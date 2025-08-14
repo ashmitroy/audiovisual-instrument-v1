@@ -7,7 +7,7 @@ function setup(){
   textAlign(CENTER, CENTER);
   textSize(24);
 
-  osc = new p5.Oscillator('sine'); // sine wave sound
+  osc = new p5.Oscillator('triangle'); // sine wave sound
 }
 
 function draw(){
@@ -18,9 +18,9 @@ function draw(){
   
   if (playing){
     // map mouseX to frequency (100–1000 Hz)
-    let freq = map(mouseX, 0, width, 100, 1000);
+    let freq = map(mouseX, 0, width, 200, 800);
     // map mouseY to volume (0–0.5)
-    let vol = map(mouseY, height, 0, 0, 0.5);
+    let vol = map(mouseY, height, 0, 0, 0.2);
     osc.freq(freq);
     osc.amp(vol);
   }
