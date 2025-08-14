@@ -40,7 +40,7 @@ function draw(){
     shapeColor = color(brightness, 100, 200);
 
     // special burst effect if volume is high
-    if (vol > 0.3) {
+    if (vol > 0.4) {
       for (let i = 0; i < 12; i++) {
         let angle = TWO_PI * i / 12;
         let x = width / 2 + cos(angle) * (shapeSize + 20);
