@@ -29,7 +29,7 @@ function draw(){
     let freq = map(mouseX, 0, width, 100, 1000);
 
     // map mouseY to volume (0–0.5)
-    let vol = map(mouseY, 0, height, 1, 0);
+    let vol = map(mouseY, 0, height, 0, 1);
     osc.freq(freq);
     osc.amp(vol);
 
