@@ -1,49 +1,63 @@
-let osc; // sound generator
+// ====== STATE ======
+let osc;
 let playing = false;
 
-// visual properties
+// visuals
 let shapeSize = 50;
 let shapeColor;
 
+// multi-style data
+let waveforms = ['sine', 'triangle', 'square'];
+let palettes = [
+  {r:255, g:100, b:200}, // style 0 - pink
+  {r:120, g:240, b:255}, // style 1 - blue/green
+  {r:255, g:180, b:90}   // style 2 - orange
+];
+let currentStyle = 0;
+
+// ====== SETUP ======
 function setup(){
   createCanvas(windowWidth, windowHeight);
   background(15);
   textAlign(CENTER, CENTER);
   textSize(24);
 
-  osc = new p5.Oscillator('sine'); // sine wave sound
+  osc = new p5.Oscillator(waveforms[currentStyle]);
 
-  // default color
-  shapeColor = color(255, 100, 200);
+  // default color from palette
+  const p = palettes[currentStyle];
+  shapeColor = color(p.r, p.g, p.b);
 }
 
+// ====== DRAW LOOP ======
 function draw(){
   background(15);
 
-  fill(255);
-  text("Click to start sound • Move mouse to change pitch/volume",
-       width/2, height/2 - 150);
+  fill(200);
+  text("Click to start/stop • Move mouse: pitch/volume • Keys 1/2/3: styles",
+       width/2, 40);
 
   if (playing){
-    // map mouseX to frequency (100–1000 Hz)
-    let freq = map(mouseX, 0, width, 100, 1000);
+    // map mouse to sound
+    const freq = map(mouseX, 0, width, 100, 1000, true);
+    const vol  = map(mouseY, height, 0, 0, 0.5, true);
 
-    // map mouseY to volume (0–0.5)
-    let vol = map(mouseY, 0, height, 0, 1);
     osc.freq(freq);
     osc.amp(vol);
 
-    // link visuals to sound
-    shapeSize = map(freq, 100, 1000, 30, 120); // pitch → size
-    let brightness = map(vol, 0, 0.5, 50, 255); // volume → brightness
-    shapeColor = color(brightness, 100, 200);
+    // link sound→visuals
+    shapeSize = map(freq, 100, 1000, 30, 120);
+    const brightness = map(vol, 0, 0.5, 50, 255);
 
-    // special burst effect if volume is high
-    if (vol > 0.4) {
+    const p = palettes[currentStyle];
+    shapeColor = color(p.r, p.g, p.b, brightness);
+
+    // burst if loud
+    if (vol > 0.3) {
       for (let i = 0; i < 12; i++) {
-        let angle = TWO_PI * i / 12;
-        let x = width / 2 + cos(angle) * (shapeSize + 20);
-        let y = height / 2 + sin(angle) * (shapeSize + 20);
+        const a = TWO_PI * i / 12;
+        const x = width/2 + cos(a) * (shapeSize + 20);
+        const y = height/2 + sin(a) * (shapeSize + 20);
         noStroke();
         fill(brightness, 150, 200);
         ellipse(x, y, 8, 8);
@@ -51,12 +65,30 @@ function draw(){
     }
   }
 
-  // draw main shape (always)
+  // main shape
   noStroke();
   fill(shapeColor);
-  ellipse(width / 2, height / 2, shapeSize, shapeSize);
+  if (currentStyle === 0) {
+    ellipse(width/2, height/2, shapeSize, shapeSize);
+  } else if (currentStyle === 1) {
+    push();
+    rectMode(CENTER);
+    translate(width/2, height/2);
+    rotate(frameCount * 0.01);
+    rect(0, 0, shapeSize * 1.6, shapeSize * 0.6, 8);
+    pop();
+  } else {
+    for (let i = 0; i < 10; i++) {
+      const r = shapeSize + i * 8;
+      noFill();
+      stroke(red(shapeColor), green(shapeColor), blue(shapeColor), 180 - i*12);
+      ellipse(width/2, height/2, r, r);
+    }
+    noStroke();
+  }
 }
 
+// ====== EVENTS ======
 function mousePressed(){
   if (!playing){
     userStartAudio();
@@ -68,6 +100,17 @@ function mousePressed(){
   }
 }
 
-function windowResized(){
-  resizeCanvas(windowWidth, windowHeight);
+function keyPressed(){
+  if (key === '1') setStyle(0);
+  if (key === '2') setStyle(1);
+  if (key === '3') setStyle(2);
 }
+
+function setStyle(i){
+  currentStyle = i;
+  osc.setType(waveforms[currentStyle]);
+  const p = palettes[currentStyle];
+  shapeColor = color(p.r, p.g, p.b);
+}
+
+function windowResized(){ resizeCanvas(windowWidth, windowHeight); }
